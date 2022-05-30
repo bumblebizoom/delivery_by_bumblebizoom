@@ -1,1 +1,5 @@
 bind_addr = ":8000"
+log_level = "debug"
+
+[store]
+database_url = "root:123456789KostiK@/delivery_db"

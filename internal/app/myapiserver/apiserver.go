@@ -2,6 +2,7 @@ package myapiserver
 
 import (
 	logger "github.com/bumblebizoom/bumblogger"
+	"github.com/bumblebizoom/delivery_by_bumblebizoom/internal/store"
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 type APIserver struct {
 	config *Config
 	router *mux.Router
+	store  *store.Store
 }
 
 func New(config *Config) *APIserver {
@@ -26,6 +28,10 @@ func (s *APIserver) Start() error {
 
 	s.configureRouter()
 
+	if err := s.configureStore(); err != nil {
+		return err
+	}
+
 	logger.Info("Starting api server")
 
 	return http.ListenAndServe(s.config.BindAddr, s.router)
@@ -40,6 +46,16 @@ func (s *APIserver) configureLogger() error {
 
 func (s *APIserver) configureRouter() error {
 	s.router.HandleFunc("/hallo", s.handleHallo())
+	return nil
+}
+
+func (s *APIserver) configureStore() error {
+	st := store.New(s.config.Store)
+	if err := st.Open(); err != nil {
+		return err
+	}
+	s.store = st
+
 	return nil
 }
 
